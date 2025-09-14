@@ -1,3 +1,4 @@
+// /todo-app-backend\src\test\java\com\example\todo\service\TodoServiceTest.java
 package com.example.todo.service;
 
 import com.example.todo.model.Todo;
@@ -76,4 +77,19 @@ class TodoServiceTest {
         assertThat(updated).isNull();
         verify(todoRepository, never()).save(any());
     }
+
+    @Test
+void getAllTodos_returnsAllTodos() {
+    Todo t1 = new Todo("Task1", "Desc1");
+    Todo t2 = new Todo("Task2", "Desc2");
+    when(todoRepository.findAll()).thenReturn(Arrays.asList(t1, t2));
+
+    List<Todo> todos = todoService.getAllTodos();
+
+    assertThat(todos).hasSize(2);
+    assertThat(todos.get(0).getTitle()).isEqualTo("Task1");
+    assertThat(todos.get(1).getTitle()).isEqualTo("Task2");
+    verify(todoRepository, times(1)).findAll();
+}
+
 }

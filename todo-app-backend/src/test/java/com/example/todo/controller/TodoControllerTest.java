@@ -1,3 +1,4 @@
+//todo-app-backend\src\test\java\com\example\todo\controller\TodoControllerTest.java
 package com.example.todo.controller;
 
 import com.example.todo.model.Todo;
@@ -60,4 +61,114 @@ class TodoControllerTest {
                         .content(body))
                 .andExpect(status().isBadRequest());
     }
+
+    // GET all todos
+@Test
+void getAllTodos_returnsList() throws Exception {
+    Todo t1 = new Todo("Task1", "Desc1");
+    t1.setId(1L);
+    Todo t2 = new Todo("Task2", "Desc2");
+    t2.setId(2L);
+
+    when(todoService.getAllTodos()).thenReturn(Arrays.asList(t1, t2));
+
+    mockMvc.perform(get("/api/todos")
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(2))
+            .andExpect(jsonPath("$[0].title").value("Task1"))
+            .andExpect(jsonPath("$[1].title").value("Task2"));
+}
+
+// GET by ID
+@Test
+void getTodoById_existing_returns200() throws Exception {
+    Todo todo = new Todo("Task1", "Desc1");
+    todo.setId(1L);
+
+    when(todoService.getTodoById(1L)).thenReturn(todo);
+
+    mockMvc.perform(get("/api/todos/1")
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(1))
+            .andExpect(jsonPath("$.title").value("Task1"));
+}
+
+@Test
+void getTodoById_notFound_returns404() throws Exception {
+    when(todoService.getTodoById(99L)).thenReturn(null);
+
+    mockMvc.perform(get("/api/todos/99")
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound());
+}
+
+// PUT update
+@Test
+void updateTodo_existing_returns200() throws Exception {
+    Todo update = new Todo("Updated", "NewDesc");
+    update.setCompleted(true);
+    update.setId(1L);
+
+    when(todoService.updateTodo(any(Long.class), any(Todo.class))).thenReturn(update);
+
+    mockMvc.perform(put("/api/todos/1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(update)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.title").value("Updated"))
+            .andExpect(jsonPath("$.completed").value(true));
+}
+
+@Test
+void updateTodo_notFound_returns404() throws Exception {
+    Todo update = new Todo("Updated", "NewDesc");
+
+    when(todoService.updateTodo(any(Long.class), any(Todo.class))).thenReturn(null);
+
+    mockMvc.perform(put("/api/todos/99")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(update)))
+            .andExpect(status().isNotFound());
+}
+
+// DELETE
+@Test
+void deleteTodo_existing_returns204() throws Exception {
+    when(todoService.deleteTodo(1L)).thenReturn(true);
+
+    mockMvc.perform(delete("/api/todos/1")
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNoContent());
+}
+
+@Test
+void deleteTodo_notFound_returns404() throws Exception {
+    when(todoService.deleteTodo(99L)).thenReturn(false);
+
+    mockMvc.perform(delete("/api/todos/99")
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isNotFound());
+}
+
+@Test
+void getAllTodos_returnsList() throws Exception {
+    Todo t1 = new Todo("Task1", "Desc1");
+    t1.setId(1L);
+    Todo t2 = new Todo("Task2", "Desc2");
+    t2.setId(2L);
+
+    when(todoService.getAllTodos()).thenReturn(Arrays.asList(t1, t2));
+
+    mockMvc.perform(get("/api/todos")
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.length()").value(2))
+            .andExpect(jsonPath("$[0].title").value("Task1"))
+            .andExpect(jsonPath("$[1].title").value("Task2"));
+}
+
+
+
 }
