@@ -14,7 +14,7 @@ import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("/api/todos")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "${app.cors.allowed-origins:*}")
 public class TodoController {
     
     @Autowired
