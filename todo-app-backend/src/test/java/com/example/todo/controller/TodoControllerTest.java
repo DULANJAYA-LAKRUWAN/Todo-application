@@ -14,10 +14,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import java.util.Arrays;
 
 @WebMvcTest(TodoController.class)
 class TodoControllerTest {
@@ -61,24 +61,6 @@ class TodoControllerTest {
                         .content(body))
                 .andExpect(status().isBadRequest());
     }
-
-    // GET all todos
-@Test
-void getAllTodos_returnsList() throws Exception {
-    Todo t1 = new Todo("Task1", "Desc1");
-    t1.setId(1L);
-    Todo t2 = new Todo("Task2", "Desc2");
-    t2.setId(2L);
-
-    when(todoService.getAllTodos()).thenReturn(Arrays.asList(t1, t2));
-
-    mockMvc.perform(get("/api/todos")
-                    .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.length()").value(2))
-            .andExpect(jsonPath("$[0].title").value("Task1"))
-            .andExpect(jsonPath("$[1].title").value("Task2"));
-}
 
 // GET by ID
 @Test

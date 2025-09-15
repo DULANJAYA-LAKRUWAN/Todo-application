@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Todo App</title>
+</head>
+<body>
+    <h1>Todo App</h1>
+    <input id="title" placeholder="Title"/>
+    <input id="description" placeholder="Description"/>
+    <button id="submit">Add Todo</button>
+
+    <ul id="todo-list"></ul>
+
+    <script>
+        const submitBtn = document.getElementById('submit');
+        const todoList = document.getElementById('todo-list');
+
+        submitBtn.addEventListener('click', () => {
+            const title = document.getElementById('title').value;
+            const description = document.getElementById('description').value;
+
+            if (title.trim() === "") {
+                alert("Title required");
+                return;
+            }
+
+            const li = document.createElement('li');
+            li.textContent = `${title} - ${description}`;
+            li.setAttribute("data-completed", "false");
+            li.addEventListener('dblclick', () => {
+                li.style.textDecoration = "line-through";
+                li.setAttribute("data-completed", "true");
+            });
+            todoList.appendChild(li);
+
+            document.getElementById('title').value = '';
+            document.getElementById('description').value = '';
+        });
+    </script>
+</body>
+</html>

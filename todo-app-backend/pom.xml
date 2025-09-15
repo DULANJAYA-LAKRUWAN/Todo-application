@@ -89,6 +89,23 @@
             <version>${cucumber.version}</version>
             <scope>test</scope>
         </dependency>
+        <!-- Selenium -->
+<dependency>
+    <groupId>org.seleniumhq.selenium</groupId>
+    <artifactId>selenium-java</artifactId>
+    <version>4.14.0</version>
+    <scope>test</scope>
+</dependency>
+
+<!-- WebDriver Manager to auto-manage drivers -->
+<dependency>
+    <groupId>io.github.bonigarcia</groupId>
+    <artifactId>webdrivermanager</artifactId>
+    <version>5.5.1</version>
+    <scope>test</scope>
+</dependency>
+
+
     </dependencies>
     
     <build>
