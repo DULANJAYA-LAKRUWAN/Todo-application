@@ -1,50 +1,62 @@
-// src/main/java/com/example/todo/service/TodoService.java
 package com.example.todo.service;
 
+import com.example.todo.exception.TodoNotFoundException;
 import com.example.todo.model.Todo;
 import com.example.todo.repository.TodoRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 @Service
 public class TodoService {
-    
-    @Autowired
-    private TodoRepository todoRepository;
-    
+
+    private final TodoRepository todoRepository;
+
+    public TodoService(TodoRepository todoRepository) {
+        this.todoRepository = todoRepository;
+    }
+
+    // Get all todos
     public List<Todo> getAllTodos() {
         return todoRepository.findAll();
     }
 
+    // Get a todo by ID
     public Todo getTodoById(Long id) {
-        return todoRepository.findById(id).orElse(null);
+        return todoRepository.findById(id)
+                .orElseThrow(() -> new TodoNotFoundException("Todo not found with id " + id));
     }
 
+    // Create a todo
     public Todo createTodo(Todo todo) {
+        validateTodoForCreate(todo);
         return todoRepository.save(todo);
     }
 
-    public Todo updateTodo(Long id, Todo todo) {
-        Todo existingTodo = getTodoById(id);
-        if (existingTodo != null) {
-            existingTodo.setTitle(todo.getTitle());
-            existingTodo.setDescription(todo.getDescription());
-            existingTodo.setCompleted(todo.isCompleted());
-            existingTodo.setUpdatedAt(java.time.LocalDateTime.now());
-            return todoRepository.save(existingTodo);
+    private void validateTodoForCreate(Todo todo) {
+        if (todo == null || !StringUtils.hasText(todo.getTitle())) {
+            throw new IllegalArgumentException("Title is mandatory");
         }
-        return null;
+        if (todo.getTitle().length() > 100) {
+            throw new IllegalArgumentException("Title must be between 1 and 100 characters");
+        }
     }
 
-    public boolean deleteTodo(Long id) {
+    // Update todo
+    public Todo updateTodo(Long id, Todo todo) {
         Todo existingTodo = getTodoById(id);
-        if (existingTodo != null) {
-            todoRepository.deleteById(id);
-            return true;
+        existingTodo.setTitle(todo.getTitle());
+        existingTodo.setDescription(todo.getDescription());
+        existingTodo.setCompleted(todo.isCompleted());
+        return todoRepository.save(existingTodo);
+    }
+
+    // Delete a todo
+    public void deleteTodo(Long id) {
+        if (!todoRepository.existsById(id)) {
+            throw new TodoNotFoundException("Todo not found with id " + id);
         }
-        return false;
+        todoRepository.deleteById(id);
     }
 }

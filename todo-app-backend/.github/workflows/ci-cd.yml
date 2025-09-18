@@ -1,61 +1,74 @@
-#todo-app-backend\.github\workflows\ci-cd.yml
 name: CI/CD Pipeline
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
+  workflow_dispatch:
+
+env:
+  DB_URL: jdbc:mysql://127.0.0.1:3306/todo_db?useSSL=false&allowPublicKeyRetrieval=true
+  DB_USERNAME: root
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
     services:
       mysql:
         image: mysql:8
         env:
-          MYSQL_ROOT_PASSWORD: 20021115
+          MYSQL_ROOT_PASSWORD: ${{ secrets.DB_PASSWORD }}
           MYSQL_DATABASE: todo_db
         ports:
           - 3306:3306
         options: >-
-          --health-cmd "mysqladmin ping --silent"
+          --health-cmd "mysqladmin ping --silent -h 127.0.0.1 -u root -p${20021115}"
           --health-interval 10s
           --health-timeout 5s
-          --health-retries 3
+          --health-retries 10
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
-          java-version: 17
           distribution: temurin
+          java-version: 17
 
       - name: Cache Maven packages
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.m2/repository
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Build project
-        run: mvn clean install -DskipTests=true
+      - name: Wait for MySQL to be ready
+        run: |
+          for i in {1..30}; do
+            mysqladmin ping -h 127.0.0.1 -uroot -p${{ secrets.DB_PASSWORD }} && break || sleep 2
+          done
+
+      - name: Build project (skip tests)
+        run: mvn -B -DskipTests clean package
 
       - name: Run unit tests
-        run: mvn test
+        run: mvn -B test
 
-      - name: Run REST Assured & BDD tests
-        run: mvn verify
+      - name: Run integration (RestAssured) & BDD (Cucumber) tests
+        env:
+          DB_URL: ${{ env.DB_URL }}
+          DB_USERNAME: ${{ env.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          ALLOWED_ORIGINS: http://localhost:3000
+        run: mvn -B verify
 
       - name: Upload test reports
-        uses: actions/upload-artifact@v3
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
           name: test-reports
-          path: target/surefire-reports/
+          path: target/surefire-reports/, target/failsafe-reports/, target/cucumber-reports/
