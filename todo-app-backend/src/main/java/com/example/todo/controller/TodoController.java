@@ -1,10 +1,14 @@
+// File: todo-app-backend/src/main/java/com/example/todo/controller/TodoController.java
 package com.example.todo.controller;
 
-import com.example.todo.model.Todo;
+import com.example.todo.dto.TodoRequestDTO;
+import com.example.todo.dto.TodoResponse;
 import com.example.todo.service.TodoService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -17,41 +21,42 @@ public class TodoController {
         this.todoService = todoService;
     }
 
-    // ✅ Get all todos
+    // GET /api/todos
     @GetMapping
-    public ResponseEntity<List<Todo>> getAllTodos() {
-        List<Todo> todos = todoService.getAllTodos();
+    public ResponseEntity<List<TodoResponse>> getAllTodos() {
+        List<TodoResponse> todos = todoService.getAllTodos();
         return ResponseEntity.ok(todos);
     }
 
-    // ✅ Get a single todo by ID
+    // GET /api/todos/{id}
     @GetMapping("/{id}")
-    public ResponseEntity<Todo> getTodoById(@PathVariable Long id) {
-        Todo todo = todoService.getTodoById(id);
+    public ResponseEntity<TodoResponse> getTodoById(@PathVariable("id") Long id) {
+        TodoResponse todo = todoService.getTodoById(id);
         return ResponseEntity.ok(todo);
     }
 
-    // ✅ Create a new todo
+    // POST /api/todos
     @PostMapping
-    public ResponseEntity<Todo> createTodo(@RequestBody Todo todo) {
-        Todo created = todoService.createTodo(todo);
-        return ResponseEntity.ok(created);
+    public ResponseEntity<TodoResponse> createTodo(@Valid @RequestBody TodoRequestDTO dto) {
+        TodoResponse created = todoService.createTodo(dto);
+        // include Location header for REST best practice
+        URI location = URI.create(String.format("/api/todos/%d", created.getId()));
+        return ResponseEntity.created(location).body(created);
     }
 
-    // ✅ Update an existing todo
+    // PUT /api/todos/{id}
     @PutMapping("/{id}")
-    public ResponseEntity<Todo> updateTodo(
-            @PathVariable Long id,
-            @RequestBody Todo todo
-    ) {
-        Todo updated = todoService.updateTodo(id, todo);
+    public ResponseEntity<TodoResponse> updateTodo(
+            @PathVariable("id") Long id,
+            @Valid @RequestBody TodoRequestDTO dto) {
+        TodoResponse updated = todoService.updateTodo(id, dto);
         return ResponseEntity.ok(updated);
     }
 
-    // ✅ Delete a todo
+    // DELETE /api/todos/{id}
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTodo(@PathVariable Long id) {
-        todoService.deleteTodo(id);
+    public ResponseEntity<Void> deleteTodo(@PathVariable("id") Long id) {
+        todoService.deleteTodo(id); // will throw TodoNotFoundException if not found
         return ResponseEntity.noContent().build();
     }
 }

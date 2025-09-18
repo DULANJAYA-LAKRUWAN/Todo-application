@@ -1,6 +1,9 @@
+//todo-app-backend\src\main\java\com\example\todo\model\Todo.java
 package com.example.todo.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 @Entity
@@ -10,6 +13,8 @@ public class Todo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Title is mandatory")
+    @Size(max = 100, message = "Title must be less than or equal to 100 characters")
     @Column(nullable = false, length = 100)
     private String title;
 
@@ -34,11 +39,16 @@ public class Todo {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = this.createdAt;
+        // Normalize optional fields
+        if (this.title != null) this.title = this.title.trim();
+        if (this.description != null) this.description = this.description.trim();
     }
 
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
+        if (this.title != null) this.title = this.title.trim();
+        if (this.description != null) this.description = this.description.trim();
     }
 
     // Getters & setters
