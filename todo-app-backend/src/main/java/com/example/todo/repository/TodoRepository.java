@@ -1,5 +1,3 @@
-//todo-app-backend\src\main\java\com\example\todo\repository\TodoRepository.java
-
 package com.example.todo.repository;
 
 import com.example.todo.model.Todo;

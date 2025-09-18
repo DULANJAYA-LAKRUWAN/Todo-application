@@ -1,4 +1,3 @@
-//  File: todo-app-backend/src/main/java/com/example/todo/model/Todo.java
 package com.example.todo.model;
 
 import jakarta.persistence.*;
@@ -42,7 +41,7 @@ public class Todo {
         this.updatedAt = LocalDateTime.now();
     }
 
-    // Getters & setters...
+    // Getters & setters
     public Long getId() { return id; }
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }

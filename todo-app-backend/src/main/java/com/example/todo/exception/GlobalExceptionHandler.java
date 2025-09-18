@@ -1,4 +1,4 @@
-//  File: todo-app-backend/src/main/java/com/example/todo/exception/GlobalExceptionHandler.java
+// File: todo-app-backend/src/main/java/com/example/todo/exception/GlobalExceptionHandler.java
 package com.example.todo.exception;
 
 import org.slf4j.Logger;
@@ -22,7 +22,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleValidationErrors(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach(err -> {
-            String field = (err instanceof FieldError fe) ? fe.getField() : err.getObjectName();
+            String field;
+            if (err instanceof FieldError) {
+                field = ((FieldError) err).getField();
+            } else {
+                field = err.getObjectName();
+            }
             errors.put(field, err.getDefaultMessage());
         });
         return buildResponse(HttpStatus.BAD_REQUEST, "Validation failed", errors);

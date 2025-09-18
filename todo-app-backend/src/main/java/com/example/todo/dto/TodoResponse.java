@@ -1,4 +1,3 @@
-// /src/main/java/com/example/todo/dto/TodoResponse.java
 package com.example.todo.dto;
 
 import java.time.LocalDateTime;
@@ -20,7 +19,7 @@ public class TodoResponse {
         this.updatedAt = updatedAt;
     }
 
-    // Getters only (response DTOs are immutable)
+    // Getters
     public Long getId() { return id; }
     public String getTitle() { return title; }
     public String getDescription() { return description; }
