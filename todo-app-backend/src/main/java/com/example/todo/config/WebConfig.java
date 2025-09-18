@@ -1,3 +1,4 @@
+// File: todo-app-backend/src/main/java/com/example/todo/config/WebConfig.java
 package com.example.todo.config;
 
 import org.springframework.context.annotation.Bean;
@@ -7,7 +8,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig {
-
     @Bean
     public WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {

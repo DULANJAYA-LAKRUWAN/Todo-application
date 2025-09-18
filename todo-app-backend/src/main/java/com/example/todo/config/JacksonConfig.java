@@ -1,3 +1,4 @@
+//  File: todo-app-backend/src/main/java/com/example/todo/config/JacksonConfig.java
 package com.example.todo.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -8,7 +9,6 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class JacksonConfig {
-
     @Bean
     public ObjectMapper objectMapper() {
         ObjectMapper mapper = new ObjectMapper();
