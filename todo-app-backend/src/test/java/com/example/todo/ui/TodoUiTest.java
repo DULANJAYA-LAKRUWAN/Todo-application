@@ -24,7 +24,7 @@ public class TodoUiTest {
     @AfterEach
     void tearDown() {
         if (driver != null) driver.quit();
-    }
+    }gg
 
     @Test
     void addTodo_createsNewItem() {

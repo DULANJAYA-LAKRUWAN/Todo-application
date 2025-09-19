@@ -3,7 +3,7 @@ const { Builder, By, until } = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 
 (async function addItemTest() {
-  let driver = await new Builder().forBrowser('chrome').setChromeOptions(new chrome.Options()).build();
+  let driver = await new Builder().forBrowser('chrome').setChromeOptions(new chrome.Options().headless()).build();
   try {
     await driver.get('http://localhost:3000');
     await driver.wait(until.elementLocated(By.css('.todo-form')), 5000);
