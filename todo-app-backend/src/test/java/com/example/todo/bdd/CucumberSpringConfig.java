@@ -1,25 +1,12 @@
-//todo-app-backend\src\test\java\com\example\todo\bdd\CucumberSpringConfig.java
 package com.example.todo.bdd;
 
-import com.example.todo.controller.TodoController;
-import com.example.todo.service.TodoService;
 import io.cucumber.spring.CucumberContextConfiguration;
-import org.mockito.Mockito;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
 @CucumberContextConfiguration
-@WebMvcTest(TodoController.class)
-@Import(CucumberSpringConfig.TestConfig.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
 public class CucumberSpringConfig {
-
-    @Configuration
-    static class TestConfig {
-        @Bean
-        public TodoService todoService() {
-            return Mockito.mock(TodoService.class);
-        }
-    }
+    // This class simply wires Cucumber to Spring Boot context for BDD tests.
 }

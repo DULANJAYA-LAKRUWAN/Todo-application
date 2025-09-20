@@ -1,20 +1,26 @@
-// todo-app-backend\src\test\java\com\example\todo\api\TodoApiTest.java
 package com.example.todo.api;
 
-import com.example.todo.model.Todo;
 import io.restassured.RestAssured;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.context.ActiveProfiles;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
 public class TodoApiTest {
 
-    @BeforeAll
-    static void setup() {
+    @LocalServerPort
+    private int port;
+
+    @BeforeEach
+    void setup() {
+        RestAssured.port = port;
         RestAssured.baseURI = "http://localhost";
-        RestAssured.port = 8080;
     }
 
     @Test
@@ -28,13 +34,11 @@ public class TodoApiTest {
 
     @Test
     void createTodo_returns201() {
-        Todo todo = new Todo();
-        todo.setTitle("API Test Todo");
-        todo.setDescription("Demo via RestAssured");
+        String json = "{\"title\":\"API Test Todo\",\"description\":\"Demo via RestAssured\"}";
 
         given()
             .contentType("application/json")
-            .body(todo)
+            .body(json)
         .when()
             .post("/api/todos")
         .then()

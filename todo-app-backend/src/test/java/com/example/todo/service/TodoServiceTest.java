@@ -1,4 +1,3 @@
-//todo-app-backend\src\test\java\com\example\todo\service\TodoServiceTest.java
 package com.example.todo.service;
 
 import com.example.todo.dto.TodoRequestDTO;
@@ -7,16 +6,19 @@ import com.example.todo.exception.TodoNotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@Transactional
+@ActiveProfiles("test")
 public class TodoServiceTest {
 
     @Autowired
     private TodoService todoService;
 
-    // ✅ Test: Add valid task
     @Test
     void testAddTask() {
         TodoRequestDTO request = new TodoRequestDTO();
@@ -31,31 +33,16 @@ public class TodoServiceTest {
         assertFalse(savedTask.isCompleted(), "Task should not be completed by default");
     }
 
-    // ✅ Test: Invalid input (empty title)
-    @Test
-    void testAddTask_InvalidInput() {
-        TodoRequestDTO request = new TodoRequestDTO();
-        request.setTitle(""); // Invalid title
-        request.setDescription("Some description");
-
-        Exception exception = assertThrows(Exception.class, () -> {
-            todoService.createTodo(request);
-        });
-
-        assertTrue(exception.getMessage().contains("Title"), "Error message should mention title");
-    }
-
-    // ✅ Test: Update existing task
     @Test
     void testUpdateTask() {
-        // First create
+        // create
         TodoRequestDTO request = new TodoRequestDTO();
         request.setTitle("Old Task");
         request.setDescription("Old Desc");
         request.setCompleted(false);
         TodoResponse created = todoService.createTodo(request);
 
-        // Update it
+        // update
         TodoRequestDTO updateRequest = new TodoRequestDTO();
         updateRequest.setTitle("Updated Task");
         updateRequest.setDescription("Updated Desc");
@@ -68,7 +55,6 @@ public class TodoServiceTest {
         assertTrue(updated.isCompleted());
     }
 
-    // ✅ Test: Delete task
     @Test
     void testDeleteTask() {
         TodoRequestDTO request = new TodoRequestDTO();

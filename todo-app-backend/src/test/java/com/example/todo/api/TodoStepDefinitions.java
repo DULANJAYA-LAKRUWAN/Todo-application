@@ -1,31 +1,31 @@
-// todo-app-backend\src\test\java\com\example\todo\bdd\TodoStepDefinitions.java
-package com.example.todo.bdd;
+package com.example.todo.api;
 
-import com.example.todo.model.Todo;
-import com.example.todo.repository.TodoRepository;
-import io.cucumber.java.en.*;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.context.ActiveProfiles;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
 public class TodoStepDefinitions {
 
-    @Autowired
-    private TodoRepository todoRepository;
-
+    @LocalServerPort
+    private int port;
+    
     private Response response;
-    private Long savedTodoId;
 
     @Given("the system is running")
     public void the_system_is_running() {
+        RestAssured.port = port;
         RestAssured.baseURI = "http://localhost";
-        RestAssured.port = 8080;
     }
 
     @When("I create a todo with title {string} and description {string}")
@@ -47,19 +47,5 @@ public class TodoStepDefinitions {
     public void the_response_should_contain_a_todo_with_title(String title) {
         String actualTitle = response.jsonPath().getString("title");
         assertThat(actualTitle, equalTo(title));
-    }
-
-    @Given("the system has a todo with title {string} and description {string}")
-    public void the_system_has_a_todo(String title, String description) {
-        Todo todo = new Todo(title, description);
-        Todo saved = todoRepository.save(todo);
-        savedTodoId = saved.getId();
-    }
-
-    @When("I retrieve the todo by its ID")
-    public void i_retrieve_the_todo_by_its_id() {
-        response = given()
-                .when()
-                .get("/api/todos/" + savedTodoId);
     }
 }

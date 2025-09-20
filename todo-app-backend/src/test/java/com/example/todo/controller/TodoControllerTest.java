@@ -1,79 +1,83 @@
-//todo-app-backend\src\test\java\com\example\todo\controller\TodoControllerTest.java
 package com.example.todo.controller;
 
-import com.example.todo.model.Todo;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 public class TodoControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
     private ObjectMapper objectMapper;
-
-    @BeforeEach
-    void setup() {
-        objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-    }
 
     @Test
     void createTodo_validRequest_returns201() throws Exception {
-        Todo todo = new Todo();
-        todo.setTitle("Test Todo");
-        todo.setDescription("Demo task");
-        
+        String json = "{\"title\":\"Test Todo\",\"description\":\"Demo task\"}";
+
         mockMvc.perform(post("/api/todos")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(todo)))
+                .content(json))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.title").value("Test Todo"));
     }
 
     @Test
-    void updateTodo_existing_returns200() throws Exception {
-        Todo todo = new Todo();
-        todo.setTitle("Update Todo");
-        todo.setDescription("Before update");
+    void createTodo_blankTitle_returns400() throws Exception {
+        String json = "{\"title\":\"\",\"description\":\"invalid\"}";
 
+        mockMvc.perform(post("/api/todos")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.title").exists());
+    }
+
+    @Test
+    void updateTodo_existing_returns200() throws Exception {
+        // create first
+        String createJson = "{\"title\":\"Update Todo\",\"description\":\"Before update\"}";
         String response = mockMvc.perform(post("/api/todos")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(todo)))
+                .content(createJson))
                 .andExpect(status().isCreated())
                 .andReturn().getResponse().getContentAsString();
 
-        Todo created = objectMapper.readValue(response, Todo.class);
-        created.setDescription("Updated description");
+        // extract id using ObjectMapper
+        com.fasterxml.jackson.databind.JsonNode node = objectMapper.readTree(response);
+        Long id = node.get("id").asLong();
 
-        mockMvc.perform(put("/api/todos/{id}", created.getId())
+        String updateJson = "{\"title\":\"Update Todo\",\"description\":\"Updated description\",\"completed\":true}";
+
+        mockMvc.perform(put("/api/todos/{id}", id)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(created)))
+                .content(updateJson))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.description").value("Updated description"));
+                .andExpect(jsonPath("$.description").value("Updated description"))
+                .andExpect(jsonPath("$.completed").value(true));
     }
 
     @Test
     void updateTodo_notFound_returns404() throws Exception {
-        Todo todo = new Todo();
-        todo.setTitle("Non-existent");
-        todo.setDescription("Nothing");
+        String updateJson = "{\"title\":\"Non-existent\",\"description\":\"Nothing\"}";
 
         mockMvc.perform(put("/api/todos/{id}", 9999)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(todo)))
+                .content(updateJson))
                 .andExpect(status().isNotFound());
     }
 }
